@@ -1,0 +1,958 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: キャプション生成ツール
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/bedrock:0.0.24@d15b21a5f8833d2489cd336798188b929a9f86e1c05f2f4770c05fc3e1e991bf
+    version: null
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.7@9031bbf9b37d9f6341a20c78a8bd18d686afd3ff627545496c3557705419d084
+    version: null
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/gemini:0.6.4@17f286b2d6699a258a2eba8bc1bff71b8f795b6aa7bee1464cbfa450b451303a
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables:
+  - description: 生成された最新のキャプション本文
+    id: 5002e8f8-b708-4f76-8bdd-b66db2b89f0b
+    name: current_caption
+    selector:
+    - conversation
+    - current_caption
+    value: ''
+    value_type: string
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - remote_url
+      - local_file
+      enabled: true
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: '<button data-message="キャプション生成">キャプション生成</button>
+
+      <form data-format=''json''>'
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 1764133239426-false-1764133274543-target
+      source: '1764133239426'
+      sourceHandle: 'false'
+      target: '1764133274543'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: iteration
+      id: 1764133274543-source-1764137507023-target
+      source: '1764133274543'
+      sourceHandle: source
+      target: '1764137507023'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1764137507023'
+        sourceType: iteration-start
+        targetType: http-request
+      id: 1764137507023start-source-1764137568539-target
+      source: 1764137507023start
+      sourceHandle: source
+      target: '1764137568539'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: iteration
+        targetType: code
+      id: 1764137507023-source-1764137639774-target
+      source: '1764137507023'
+      sourceHandle: source
+      target: '1764137639774'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: template-transform
+      id: 1764137639774-source-1764137713240-target
+      source: '1764137639774'
+      sourceHandle: source
+      target: '1764137713240'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: template-transform
+        targetType: knowledge-retrieval
+      id: 1764137713240-source-1764137766656-target
+      source: '1764137713240'
+      sourceHandle: source
+      target: '1764137766656'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: llm
+      id: 1764137766656-source-llm-target
+      source: '1764137766656'
+      sourceHandle: source
+      target: llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: assigner
+      id: llm-source-1764138645177-target
+      source: llm
+      sourceHandle: source
+      target: '1764138645177'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: question-classifier
+      id: 1764132979650-source-1764138703709-target
+      source: '1764132979650'
+      sourceHandle: source
+      target: '1764138703709'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: if-else
+      id: 1764138703709-1-1764133239426-target
+      source: '1764138703709'
+      sourceHandle: '1'
+      target: '1764133239426'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: llm
+      id: 1764138703709-2-1764138847708-target
+      source: '1764138703709'
+      sourceHandle: '2'
+      target: '1764138847708'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: assigner
+      id: 1764138847708-source-1764139281626-target
+      source: '1764138847708'
+      sourceHandle: source
+      target: '1764139281626'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: 1764139281626-source-answer-target
+      source: '1764139281626'
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: 1764138645177-source-answer-target
+      source: '1764138645177'
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1764133239426-true-1764144951349-target
+      source: '1764133239426'
+      sourceHandle: 'true'
+      target: '1764144951349'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 1764144951349-source-1764137639774-target
+      source: '1764144951349'
+      sourceHandle: source
+      target: '1764137639774'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: ユーザー入力
+        type: start
+        variables:
+        - default: ''
+          hint: ''
+          label: 企画案
+          max_length: 256
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: planning_proposal
+        - default: ''
+          hint: ''
+          label: 企画意図
+          max_length: 10000
+          options: []
+          placeholder: ''
+          required: true
+          type: paragraph
+          variable: planning_intent
+        - default: ''
+          hint: ''
+          label: 参照URL①
+          max_length: 10000
+          options: []
+          placeholder: ''
+          required: false
+          type: paragraph
+          variable: ref_url1
+        - default: ''
+          hint: ''
+          label: 参照URL②
+          max_length: 10000
+          options: []
+          placeholder: ''
+          required: false
+          type: paragraph
+          variable: ref_url2
+        - default: ''
+          hint: ''
+          label: 参照URL③
+          max_length: 10000
+          options: []
+          placeholder: ''
+          required: false
+          type: paragraph
+          variable: ref_url3
+      height: 213
+      id: '1764132979650'
+      position:
+        x: 6.388758800566848
+        y: 358
+      positionAbsolute:
+        x: 6.388758800566848
+        y: 358
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: false
+            size: 10
+        model:
+          completion_params: {}
+          mode: chat
+          name: gpt-5-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - edition_type: basic
+          id: f2ab7006-230c-4e33-a205-75ba244eda95
+          role: system
+          text: "# Role\nあなたは化粧品ブランド「トワニー（TWANY）」の熟練SNSマーケティング担当者です。\nユーザーから提供される「企画情報」と「参照データ」を基に、フォロワーの心に響くInstagram投稿のキャプション（完成形）を作成してください。\n\
+            \n# Brand Persona (最重要：トワニーの語り口)\n**あなたは「AI」や「説明者」ではなく、ユーザーの美に寄り添う「良きパートナー」です。以下のトーン＆マナーを徹底的に守ってください。**\n\
+            \n1.  **語り口の温度感**:\n    * × 硬い表現：「〜をご存知でしょうか」「〜を使用することで効果があります」\n    *\
+            \ ○ トワニー流：「〜だと思いませんか？」「〜なのが嬉しいですよね\U0001F33F」「〜してみませんか？」\n    * 親しみやすさの中に、大人の女性に向けた「品格」と「知性」を滲ませてください。\n\
+            2.  **共感と問いかけ（Toikake）**:\n    * 一方的に情報を投げるのではなく、冒頭（見出しの直後）は必ずユーザーの日常や肌実感にリンクさせてください。\n\
+            3.  **リズムと余白**:\n    * 漢字ばかりの詰まった文章は避けて、適度にひらがなを開いてください。\n\n# Knowledge\
+            \ Logic (TYPE定義 & 厳格な判定基準)\n以下の優先順位に従って、TYPE-AかTYPE-Bかを判定してください。\n**【重要】キーワードによる判定を最優先します。文脈よりも単語の有無で機械的に決定してください。**\n\
+            \n**判定の絶対ルール**:\n企画案や意図の中に、以下の**TYPE-Bトリガーワード**が1つでも含まれる場合は、たとえテーマが「乾燥対策」や「毛穴ケア」などの悩み解決であっても、**必ず「TYPE-B」**として構成すること。\n\
+            \n1.  **TYPE-B（ニュース・新商品型）**\n    * **絶対トリガー**: **「登場」「新発売」「新商品」「リニューアル」「限定」「コフレ」「新色」「解禁」「誕生」「予約」**\n\
+            \    * **【必須】冒頭フォーマット**:\n        * **必ずキャプションの1行目を、全角記号「＼」と「／」で挟んだキャッチーな見出しから始めてください。**\n\
+            \        * 例：`＼今だけ限定ラージサイズ登場！／` `＼待望のリニューアル✨／`\n    * **構成フロー**:\n   \
+            \     1.  **News Headline**: ＼短いニュース見出し／\n        2.  **Hook**: その直後に、ユーザーへの問いかけや共感で繋ぐ（トワニーらしさ）。\n\
+            \        3.  **Detail**: 進化点や限定要素の魅力。\n        4.  **Benefit**: 情緒的価値。\n\
+            \n2.  **TYPE-A（課題解決・季節型）**\n    * **トリガー**: 上記TYPE-Bのキーワードが**一つもない**場合のみ選択。\n\
+            \    * **キーワード**: 「乾燥」「毛穴」「くすみ」「紫外線」「テカリ」「季節の変わり目」「ルーティン」「見直し」\n    *\
+            \ **構成フロー**: 悩みの代弁・共感(Sympathy) → 解決策の提案(Solution) → 使用後のベネフィット(Benefit)\
+            \ → 結び\n\n# strict Compliance Rules (遵守事項)\n**トーンは柔らかくとも、以下のルールは法律遵守のため厳格に適用すること。**\n\
+            1.  **未記載の効能表現の禁止**:\n    * 参照データに明記されていない効能（特に「美白」「エイジングケア」等の強い言葉）は、雰囲気で補完せず**絶対に使用しない**でください。\n\
+            2.  **注釈の完全同期**:\n    * 参照データ内で注釈記号（＊1, ※1など）がついている成分名や効能表現を使用する場合、キャプション内でも**必ず同じ記号を付与**してください。\n\
+            \    * 注釈の説明文は本文中には書かず、**所定の位置（本文の下）**にまとめてください。\n\n# Process Instructions\n\
+            1.  **判定と情報の統合**:\n    * **Step 1（最優先）**: ユーザー入力（企画案・意図）をスキャンし、「登場」「新」などのTYPE-Bトリガーがあるか探す。**あれば即座にTYPE-Bモードに固定する。**\n\
+            \    * スクレイピング情報から商品スペックを抽出。\n2.  **執筆**:\n    * 絵文字の使用：適度に使用し、画面を華やかにする（✨,\
+            \ \U0001F48E, \U0001F33F, ❤, \U0001F484 など）。\n    * 医薬部外品の場合：スペック欄の商品名右側にのみ【医薬部外品】と記載。\n\
+            \    * **構成指示ラベル（「（導入）」など）は出力しない。**\n3.  **最終確認（重要）**:\n    * **商品名チェック**:\
+            \ 本文の後ろにある「〜が気になる！という方は」の直前の行に、**必ず今回紹介した全商品名が記載されているか**確認する。ここが空欄になっている場合は出力を修正し、必ず商品名を埋めること。\n\
+            \n# Output Format\n以下の形式で**投稿用テキストのみ**を出力してください。\n**配置順序および、後述する【条件付き行の削除ルール】を厳守してください。**\n\
+            \n[画像1枚目に入れるKV（キャッチコピー）]\n\n---\n\n[キャプション本文]\n※自然な段落分けを行うこと。\n※TYPE-Bの場合は、必ず\
+            \ `＼見出し文言／` から書き始めること。\n※**重要**: 本文の途中には注釈内容（説明文）を挟まないこと。記号のみにとどめること。\n\
+            \n[注釈リスト出力エリア]\n※本文終了後、使用した注釈がある場合のみ、ここに出力する。\n※**注釈が一つもない場合は、このエリアには何も出力しない（空行も入れない）。**\n\
+            \n[ここには必ず商品名を記載する（複数の場合は改行して全て列挙）]\nが気になる！という方は\n【❤】の絵文字でコメントをくださいませ。\n\
+            ※↑上記の「商品名」部分は絶対に空欄にしないこと。必ず文字が入っている状態で出力すること。\n\n率直なご意見・ご感想もお待ちしております。\n\
+            トワニー担当者が拝見いたします。\n\n----------------\n[商品名] [タイプ名（Ⅰ・Ⅱ等があればここに併記）]\n＜カテゴリー＞\n\
+            [タイプ詳細行（条件付き表示）]\n[容量]　[価格(税込)]\n[レフィル情報行（条件付き表示）]\n----------------\n\
+            \n# Conditional Rules (条件付き行の削除ルール)\n以下の項目は、データが存在しない場合に**「なし」や「―」等の文字を出力することを固く禁じます。行そのものを完全に削除してください。**\n\
+            \n1.  **[タイプ詳細行] のルール**:\n    * 公式情報に「Ⅰ：さっぱり／Ⅱ：しっとり」などの**明示的なタイプ区分**がある場合のみ出力する。\n\
+            \    * 区分がない場合、無理に分類したり「全肌質対応」などと創作せず、**行ごと削除する。**\n2.  **[レフィル情報行] のルール**:\n\
+            \    * 公式情報に「レフィル」の価格や容量記載がある場合のみ出力する。\n    * 記載がない場合、「レフィルなし」と書かず、**行ごと削除する。**\n\
+            3.  **複数商品のスペック記載ルール**:\n    * 紹介する商品が複数の場合は、`----------------` から `----------------`\
+            \ までのブロックを商品数分繰り返して記載すること。\n\n#トワニー #twany [関連ハッシュタグ]"
+        - id: 822ad106-ca0d-43b6-8b23-e8e809563d7d
+          role: user
+          text: '以下の情報を基に、SYSTEMプロンプトの指示に従って**投稿用の完成版キャプション**を作成してください。 構成ラベル（例：「（導入）」「（展開）」）は出力しないでください。
+
+
+            # 1. ユーザー企画情報
+
+            ## 企画案
+
+            {{#1764132979650.planning_proposal#}}
+
+
+            ## 企画意図
+
+            {{#1764132979650.planning_intent#}}
+
+
+            # 2. 参照コンテキスト
+
+            ## Webスクレイピングデータ (商品詳細)
+
+            {{#1764137639774.combined_text#}}
+
+
+            ## ナレッジ検索結果 (過去の勝ちパターン)
+
+            {{#context#}}'
+        selected: true
+        title: 初稿作成
+        type: llm
+        vision:
+          configs:
+            detail: high
+            variable_selector:
+            - sys
+            - files
+          enabled: true
+      height: 88
+      id: llm
+      position:
+        x: 3040
+        y: 94
+      positionAbsolute:
+        x: 3040
+        y: 94
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#conversation.current_caption#}}'
+        selected: false
+        title: 回答
+        type: answer
+        variables: []
+      height: 104
+      id: answer
+      position:
+        x: 3744
+        y: 103
+      positionAbsolute:
+        x: 3744
+        y: 103
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: empty
+            id: 9f5498cc-b53f-449e-983d-6198d77e62fa
+            value: ''
+            varType: string
+            variable_selector:
+            - '1764132979650'
+            - ref_url1
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: IF/ELSE
+        type: if-else
+      height: 124
+      id: '1764133239426'
+      position:
+        x: 704
+        y: 55
+      positionAbsolute:
+        x: 704
+        y: 55
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "def main(u1: str, u2: str, u3: str) -> dict:\n    # 入力をリストに入れる\n  \
+          \  raw_list = [u1, u2, u3]\n\n    # 空文字やNone（入力なし）を除外して、有効なURLだけのリストを作る\n\
+          \    clean_urls = [x for x in raw_list if x and x.strip() != \"\"]\n\n \
+          \   return {\n        \"url_list\": clean_urls\n    }"
+        code_language: python3
+        outputs:
+          url_list:
+            children: null
+            type: array[string]
+        selected: false
+        title: コード実行
+        type: code
+        variables:
+        - value_selector:
+          - '1764132979650'
+          - ref_url1
+          value_type: string
+          variable: u1
+        - value_selector:
+          - '1764132979650'
+          - ref_url2
+          value_type: string
+          variable: u2
+        - value_selector:
+          - '1764132979650'
+          - ref_url3
+          value_type: string
+          variable: u3
+      height: 52
+      id: '1764133274543'
+      position:
+        x: 1066
+        y: 103
+      positionAbsolute:
+        x: 1066
+        y: 103
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        error_handle_mode: terminated
+        flatten_output: true
+        height: 258
+        is_parallel: false
+        iterator_input_type: array[string]
+        iterator_selector:
+        - '1764133274543'
+        - url_list
+        output_selector:
+        - '1764137568539'
+        - body
+        output_type: array[string]
+        parallel_nums: 10
+        selected: false
+        start_node_id: 1764137507023start
+        title: イテレーション
+        type: iteration
+        width: 486
+      height: 258
+      id: '1764137507023'
+      position:
+        x: 1408
+        y: 0
+      positionAbsolute:
+        x: 1408
+        y: 0
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 486
+      zIndex: 1
+    - data:
+        desc: ''
+        isInIteration: true
+        selected: false
+        title: ''
+        type: iteration-start
+      draggable: false
+      height: 48
+      id: 1764137507023start
+      parentId: '1764137507023'
+      position:
+        x: 60
+        y: 105
+      positionAbsolute:
+        x: 1468
+        y: 105
+      selectable: false
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-iteration-start
+      width: 44
+      zIndex: 1002
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        headers: ''
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1764137507023'
+        method: get
+        params: url:{{#1764137507023.item#}}
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: HTTP リクエスト
+        type: http-request
+        url: https://screenshot.aibase.buzz/userlike
+        variables: []
+      height: 137
+      id: '1764137568539'
+      parentId: '1764137507023'
+      position:
+        x: 184
+        y: 60
+      positionAbsolute:
+        x: 1592
+        y: 60
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0.1
+          mode: chat
+          name: gemini-2.5-flash
+          provider: langgenius/gemini/google
+        prompt_template:
+        - edition_type: basic
+          id: f60e8286-a320-4ba8-8eff-53c12c2007c1
+          role: system
+          text: 添付されて資料の内容を隅々まで詳細に読み取り、文字起こししてください
+        selected: false
+        title: 資料テキスト化
+        type: llm
+        vision:
+          configs:
+            detail: high
+            variable_selector:
+            - sys
+            - files
+          enabled: true
+      height: 88
+      id: '1764144951349'
+      position:
+        x: 1076.647931334278
+        y: 249.32396566713902
+      positionAbsolute:
+        x: 1076.647931334278
+        y: 249.32396566713902
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "function main({ html_array, reference_info }) {\n  const htmlList =\
+          \ html_array || [];\n\n  // HTMLテキストをクリーンアップする内部関数\n  function cleanHtml(html)\
+          \ {\n    if (!html || typeof html !== 'string') {\n      return '';\n  \
+          \  }\n    let text = html;\n    // scriptとstyleタグを中身ごと削除\n    text = text.replace(/<script\\\
+          b[^>]*>[\\s\\S]*?<\\/script>/gi, '');\n    text = text.replace(/<style\\\
+          b[^>]*>[\\s\\S]*?<\\/style>/gi, '');\n    // bodyタグの中身だけを抽出\n    const bodyMatch\
+          \ = text.match(/<body[^>]*>([\\s\\S]*)<\\/body>/i);\n    if (bodyMatch &&\
+          \ bodyMatch[1]) {\n      text = bodyMatch[1];\n    }\n    // 残りのHTMLタグを削除\n\
+          \    text = text.replace(/<[^>]*>/g, '');\n    // HTMLエンティティを変換\n    text\
+          \ = text.replace(/&[a-zA-Z0-9#]+;/g, ' ');\n    // 全ての改行・タブをスペースに変換\n  \
+          \  text = text.replace(/[\\r\\n\\t]+/g, ' ');\n    // 連続スペースを1つに\n    text\
+          \ = text.replace(/ {2,}/g, ' ');\n    return text.trim();\n  }\n\n  // 公式URLから取得した各HTMLをクリーンアップ\n\
+          \  const cleanedOfficialTexts = htmlList.map(html => cleanHtml(html));\n\
+          \n  // クリーンアップした公式URLのテキストを一つのブロックに結合\n  const combined_official_info =\
+          \ cleanedOfficialTexts.join('\\n\\n--- [次の情報] ---\\n\\n');\n\n  // 公式URLの情報と、参考資料の情報を最終的に結合\n\
+          \  const all_info = [\n    combined_official_info,\n    reference_info\n\
+          \  ].filter(text => text && text.trim() !== '').join('\\n\\n--- [次の情報] ---\\\
+          n\\n');\n\n  return {\n    combined_text: all_info\n  };\n}"
+        code_language: javascript
+        outputs:
+          combined_text:
+            children: null
+            type: string
+        selected: false
+        title: まとめ＆ノイズ除去
+        type: code
+        variables:
+        - value_selector:
+          - '1764137507023'
+          - output
+          value_type: array[string]
+          variable: html_array
+        - value_selector:
+          - '1764144951349'
+          - text
+          value_type: string
+          variable: reference_info
+      height: 52
+      id: '1764137639774'
+      position:
+        x: 2014
+        y: 112
+      positionAbsolute:
+        x: 2014
+        y: 112
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        selected: false
+        template: '{{proposal}} {{intent}}'
+        title: テンプレート
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1764132979650'
+          - planning_proposal
+          value_type: string
+          variable: proposal
+        - value_selector:
+          - '1764132979650'
+          - planning_intent
+          value_type: string
+          variable: intent
+      height: 52
+      id: '1764137713240'
+      position:
+        x: 2356
+        y: 112
+      positionAbsolute:
+        x: 2356
+        y: 112
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        dataset_ids:
+        - Huxu6tby+fEnN/u5Fy2hlaE18EQC+NPxXK68YnIJZfgW1m2REK7fVntBq9MFOdH2
+        multiple_retrieval_config:
+          reranking_enable: true
+          reranking_mode: reranking_model
+          reranking_model:
+            model: cohere.rerank-v3-5:0
+            provider: langgenius/bedrock/bedrock
+          score_threshold: null
+          top_k: 4
+        query_variable_selector:
+        - '1764137713240'
+        - output
+        retrieval_mode: multiple
+        selected: false
+        title: 知識検索
+        type: knowledge-retrieval
+      height: 90
+      id: '1764137766656'
+      position:
+        x: 2698
+        y: 93
+      positionAbsolute:
+        x: 2698
+        y: 93
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - llm
+          - text
+          variable_selector:
+          - conversation
+          - current_caption
+          write_mode: over-write
+        selected: false
+        title: 変数代入
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1764138645177'
+      position:
+        x: 3382
+        y: 96
+      positionAbsolute:
+        x: 3382
+        y: 96
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        classes:
+        - id: '1'
+          name: 新規作成
+        - id: '2'
+          name: 修正
+        instructions: ''
+        model:
+          completion_params:
+            temperature: 0.1
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        query_variable_selector:
+        - '1764132979650'
+        - sys.query
+        selected: false
+        title: 質問分類器
+        type: question-classifier
+        vision:
+          enabled: false
+      height: 170
+      id: '1764138703709'
+      position:
+        x: 342
+        y: 379
+      positionAbsolute:
+        x: 342
+        y: 379
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params: {}
+          mode: chat
+          name: gpt-5-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - edition_type: basic
+          id: ad35decf-039a-4851-883e-98ba78c75029
+          role: system
+          text: '# Role
+
+            あなたは化粧品ブランド「トワニー（TWANY）」の熟練コピーライター兼編集者です。
+
+            現在、ユーザーとの会話変数（`current_caption`）に保存されている「投稿用キャプションの原稿」に対し、ユーザーから部分的な修正や推敲の依頼が来ています。
+
+
+            # Task
+
+            ユーザーの指示（`query`）に基づき、原稿の該当部分のみを修正・提案してください。
+
+
+            # Editing Rules
+
+            1. **ピンポイント修正**: ユーザーが指定した箇所以外（商品スペックやハッシュタグ等）は変更しないでください。
+
+            2. **トーン＆マナー維持**: トワニーらしい「親しみやすく、品のある語り口」を絶対に崩さないでください。
+
+            3. **バリエーション提示**: 「他のパターンも」という依頼の場合、切り口を変えた（共感系・機能系・情緒系など）3つの案を提示してください。
+
+            4. **構造維持**: 文脈がおかしくならないよう、前後の文章との繋がりを意識してください。
+
+
+            # Output Format
+
+            余計な前置きは最小限にし、以下の形式で見やすく出力してください。
+
+
+            【修正・提案案】
+
+            （ここに具体的な修正案やバリエーションを記述）
+
+            ---
+
+            ※修正理由やポイント（必要な場合のみ簡潔に）'
+        - id: 11f6edf2-4eaf-4ee9-93bf-10725fe02675
+          role: user
+          text: '# Current Caption (現在の原稿)
+
+            {{#conversation.current_caption#}}
+
+
+            # User Instruction (修正指示)
+
+            {{#sys.query#}}
+
+
+            上記の「現在の原稿」における、「修正指示」の意図を汲み取って、最適な修正案またはバリエーションを作成してください。'
+        selected: false
+        title: 修正
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1764138847708'
+      position:
+        x: 704
+        y: 448
+      positionAbsolute:
+        x: 704
+        y: 448
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - '1764138847708'
+          - text
+          variable_selector:
+          - conversation
+          - current_caption
+          write_mode: over-write
+        selected: false
+        title: 変数代入 2
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1764139281626'
+      position:
+        x: 2014
+        y: 244
+      positionAbsolute:
+        x: 2014
+        y: 244
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -1313.372721210039
+      y: 290.42813149092984
+      zoom: 0.5423991516714202
+  rag_pipeline_variables: []
