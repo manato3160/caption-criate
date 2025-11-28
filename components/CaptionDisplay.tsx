@@ -6,11 +6,12 @@ import type { ReviewResult } from '@/lib/types';
 interface CaptionDisplayProps {
   caption: string;
   onEdit?: () => void;
+  onManualEdit?: () => void;
   onNew?: () => void;
   reviewResult?: ReviewResult;
 }
 
-export default function CaptionDisplay({ caption, onEdit, onNew, reviewResult }: CaptionDisplayProps) {
+export default function CaptionDisplay({ caption, onEdit, onManualEdit, onNew, reviewResult }: CaptionDisplayProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -130,6 +131,14 @@ export default function CaptionDisplay({ caption, onEdit, onNew, reviewResult }:
               className="px-4 py-2 text-sm font-medium text-twany-rose border border-twany-rose rounded-lg hover:bg-twany-cream transition-colors"
             >
               修正する
+            </button>
+          )}
+          {onManualEdit && (
+            <button
+              onClick={onManualEdit}
+              className="px-4 py-2 text-sm font-medium text-twany-brown border border-twany-pink rounded-lg hover:bg-twany-cream transition-colors"
+            >
+              手動修正
             </button>
           )}
           <button
