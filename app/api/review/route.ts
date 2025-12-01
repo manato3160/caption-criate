@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const knowledge = loadKnowledge();
+    console.log(`[review API] ナレッジ読み込み完了: ${knowledge.length}件`);
     
     // ナレッジベースの内容を詳細にプロンプト用に整形
     // 全件を使用し、コンテキスト情報も含める
@@ -175,7 +176,7 @@ NG表現が1つも検出されない場合は、\`"passed": true, "issues": []\`
 必ず有効なJSON形式で回答してください。`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-mini',
       messages: [
         {
           role: 'system',
@@ -201,12 +202,14 @@ NG表現が1つも検出されない場合は、\`"passed": true, "issues": []\`
     const parsed = JSON.parse(responseText);
     
     // 型を変換し、位置情報を検証・修正
-    const issues = (parsed.issues || []).map((issue: any, index: number): any => {
+    const processedIssues = (parsed.issues || []).map((issue: any, index: number): any => {
       const matchedText = issue.matchedText || issue.name || '';
       
       if (!matchedText || matchedText.trim().length === 0) {
         return null;
       }
+      
+      const trimmedMatched = matchedText.trim();
       
       // 位置情報を検証し、必要に応じて修正
       let start = issue.position?.start ?? -1;
@@ -215,54 +218,68 @@ NG表現が1つも検出されない場合は、\`"passed": true, "issues": []\`
       // 位置情報が有効かどうかを検証
       const hasValidPosition = start >= 0 && end > start && end <= caption.length;
       
-      // 位置情報が有効な場合、実際のテキストと一致するか検証
+      // 位置情報が有効な場合、実際のテキストと完全一致するか検証
       let positionValid = false;
       if (hasValidPosition) {
         const actualText = caption.substring(start, end);
-        const trimmedMatched = matchedText.trim();
-        // 実際のテキストとmatchedTextが一致するか、または実際のテキストにmatchedTextが含まれるか確認
-        positionValid = actualText === trimmedMatched || actualText.includes(trimmedMatched) || trimmedMatched.includes(actualText);
+        // 完全一致を厳密にチェック（空白文字の前後は無視）
+        const normalizedActual = actualText.trim();
+        const normalizedMatched = trimmedMatched.trim();
+        positionValid = normalizedActual === normalizedMatched;
+        
+        // 完全一致しない場合、実際のテキストがmatchedTextを含むか確認
+        if (!positionValid) {
+          positionValid = normalizedActual.includes(normalizedMatched) || normalizedMatched.includes(normalizedActual);
+        }
       }
       
-      // 位置情報が無効または一致しない場合、matchedTextを使ってキャプション内から検索
+      // 位置情報が無効または一致しない場合、matchedTextを使ってキャプション内から正確に検索
       if (!hasValidPosition || !positionValid) {
-        const searchText = matchedText.trim();
+        // まず完全一致で検索（大文字小文字を区別）
+        let foundIndex = caption.indexOf(trimmedMatched);
         
-        // 完全一致を優先して検索（大文字小文字を区別しない）
-        let foundIndex = -1;
-        const lowerCaption = caption.toLowerCase();
-        const lowerSearchText = searchText.toLowerCase();
-        
-        // 完全一致を検索
-        foundIndex = lowerCaption.indexOf(lowerSearchText);
-        
-        // 完全一致が見つからない場合、部分一致を試す（3文字以上）
-        if (foundIndex === -1 && searchText.length >= 3) {
-          // 最初の3文字で検索
-          const partialText = searchText.substring(0, 3);
-          foundIndex = lowerCaption.indexOf(partialText.toLowerCase());
-        }
-        
-        // それでも見つからない場合、最初の2文字で検索
-        if (foundIndex === -1 && searchText.length >= 2) {
-          const partialText = searchText.substring(0, 2);
-          foundIndex = lowerCaption.indexOf(partialText.toLowerCase());
-        }
-        
-        if (foundIndex !== -1) {
-          // 見つかった位置から、実際のテキストの長さを確認
-          // 大文字小文字を考慮して正確な位置を特定
-          const actualStart = caption.indexOf(searchText, foundIndex);
-          if (actualStart !== -1) {
-            start = actualStart;
-            end = actualStart + searchText.length;
-          } else {
+        // 完全一致が見つからない場合、大文字小文字を区別しない検索
+        if (foundIndex === -1) {
+          const lowerCaption = caption.toLowerCase();
+          const lowerSearchText = trimmedMatched.toLowerCase();
+          foundIndex = lowerCaption.indexOf(lowerSearchText);
+          
+          // 見つかった場合、元のキャプションから正確な位置を特定
+          if (foundIndex !== -1) {
             // 大文字小文字が異なる場合でも、見つかった位置を使用
             start = foundIndex;
-            end = foundIndex + searchText.length;
+            end = foundIndex + trimmedMatched.length;
           }
         } else {
-          // 見つからない場合は、このissueをスキップ
+          // 完全一致が見つかった場合
+          start = foundIndex;
+          end = foundIndex + trimmedMatched.length;
+        }
+        
+        // それでも見つからない場合、部分一致を試す（3文字以上）
+        if (foundIndex === -1 && trimmedMatched.length >= 3) {
+          const partialText = trimmedMatched.substring(0, 3);
+          const lowerCaption = caption.toLowerCase();
+          const lowerPartial = partialText.toLowerCase();
+          foundIndex = lowerCaption.indexOf(lowerPartial);
+          
+          if (foundIndex !== -1) {
+            // 部分一致が見つかった場合、元のキャプションから正確な位置を特定
+            // 見つかった位置から、実際のテキストの長さを確認
+            const actualStart = caption.indexOf(partialText, foundIndex);
+            if (actualStart !== -1) {
+              start = actualStart;
+              // 部分一致の長さを使用（完全なmatchedTextの長さは使わない）
+              end = actualStart + partialText.length;
+            } else {
+              start = foundIndex;
+              end = foundIndex + partialText.length;
+            }
+          }
+        }
+        
+        // 見つからない場合は、このissueをスキップ
+        if (foundIndex === -1) {
           return null;
         }
       }
@@ -272,18 +289,72 @@ NG表現が1つも検出されない場合は、\`"passed": true, "issues": []\`
         return null;
       }
       
+      // 最終的な位置情報で実際のテキストを取得し、matchedTextと一致するか確認
+      const finalActualText = caption.substring(start, end).trim();
+      const finalMatchedText = trimmedMatched.trim();
+      
+      // 最終検証：実際のテキストとmatchedTextが一致しない場合はスキップ
+      if (finalActualText !== finalMatchedText && !finalActualText.includes(finalMatchedText) && !finalMatchedText.includes(finalActualText)) {
+        return null;
+      }
+      
       return {
-        expression: matchedText,
+        expression: trimmedMatched,
         name: issue.name || '',
         reason: issue.reason || '薬機法に抵触する可能性があります',
         position: {
           start,
           end,
         },
-        matchedText: matchedText.trim(),
+        matchedText: trimmedMatched,
         knowledgeId: `ai-detected-${index}`,
       };
     }).filter((issue: any): issue is any => issue !== null);
+    
+    // 重複を除去：同じ位置（start, end）のものは1つだけにする
+    // 位置が重複している範囲（一方が他方に含まれる）も重複として除外
+    const uniqueIssues: typeof processedIssues = [];
+    const seenPositions = new Set<string>();
+    
+    // 位置でソート（startが小さい順、同じ場合はendが小さい順）
+    const sortedIssues = [...processedIssues].sort((a, b) => {
+      if (a.position.start !== b.position.start) {
+        return a.position.start - b.position.start;
+      }
+      return a.position.end - b.position.end;
+    });
+    
+    for (const issue of sortedIssues) {
+      const positionKey = `${issue.position.start}-${issue.position.end}`;
+      
+      // 完全に同じ位置の場合はスキップ
+      if (seenPositions.has(positionKey)) {
+        continue;
+      }
+      
+      // 位置が重複している範囲（一方が他方に含まれる）をチェック
+      let isDuplicate = false;
+      const seenPositionsArray = Array.from(seenPositions);
+      for (const seenKey of seenPositionsArray) {
+        const [seenStart, seenEnd] = seenKey.split('-').map(Number);
+        
+        // 現在の位置が既存の位置に完全に含まれる、または既存の位置が現在の位置に完全に含まれる場合
+        if (
+          (issue.position.start >= seenStart && issue.position.end <= seenEnd) ||
+          (seenStart >= issue.position.start && seenEnd <= issue.position.end)
+        ) {
+          isDuplicate = true;
+          break;
+        }
+      }
+      
+      if (!isDuplicate) {
+        seenPositions.add(positionKey);
+        uniqueIssues.push(issue);
+      }
+    }
+    
+    const issues = uniqueIssues;
 
     return NextResponse.json({
       passed: parsed.passed ?? issues.length === 0,

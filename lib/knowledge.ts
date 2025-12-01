@@ -8,10 +8,13 @@ let knowledgeCache: KnowledgeItem[] | null = null;
  */
 export function loadKnowledge(): KnowledgeItem[] {
   if (knowledgeCache) {
+    console.log(`[loadKnowledge] キャッシュからナレッジを返却: ${knowledgeCache.length}件`);
     return knowledgeCache;
   }
   
   knowledgeCache = knowledgeData as KnowledgeItem[];
+  console.log(`[loadKnowledge] @/data/knowledge.jsonからナレッジを読み込み: ${knowledgeCache.length}件`);
+  console.log(`[loadKnowledge] 最初の3件のID: ${knowledgeCache.slice(0, 3).map(item => item.id).join(', ')}`);
   return knowledgeCache;
 }
 

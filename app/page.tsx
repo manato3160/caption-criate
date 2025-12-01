@@ -117,29 +117,8 @@ export default function Home() {
           setConversationId(result.conversationId);
         }
         
-        // 自動的に薬機審査を実行
-        try {
-          const review = await reviewCaption(result.answer);
-          setReviewResult(review);
-        } catch (error) {
-          console.error('薬機審査エラー:', error);
-          // 審査エラーが発生してもキャプションは表示する
-          setReviewResult({
-            passed: true, // エラー時は審査通過として扱う（エラー表示はしない）
-            issues: [],
-            totalIssues: 0,
-          });
-        }
-        
-        // 自動的にハッシュタグ生成を実行
-        try {
-          const hashtags = await generateHashtags(result.answer);
-          setHashtagResult(hashtags);
-        } catch (error) {
-          console.error('ハッシュタグ生成エラー:', error);
-          // ハッシュタグ生成エラーが発生してもキャプションは表示する
-          setHashtagResult(null);
-        }
+        // 修正モードでは薬機審査とハッシュタグ生成は実行しない
+        // 初稿作成時に生成されたreviewResultとhashtagResultをそのまま保持
         
         setViewState('result');
       }
