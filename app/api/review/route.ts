@@ -247,8 +247,27 @@ NG表現が1つも検出されない場合は、\`"passed": true, "issues": []\`
           // 見つかった場合、元のキャプションから正確な位置を特定
           if (foundIndex !== -1) {
             // 大文字小文字が異なる場合でも、見つかった位置を使用
-            start = foundIndex;
-            end = foundIndex + trimmedMatched.length;
+            // ただし、実際のテキストの長さを確認
+            const actualText = caption.substring(foundIndex, foundIndex + trimmedMatched.length);
+            if (actualText.toLowerCase() === lowerSearchText) {
+              start = foundIndex;
+              end = foundIndex + trimmedMatched.length;
+            } else {
+              // 実際のテキストの長さを確認して調整
+              let actualEnd = foundIndex;
+              for (let i = foundIndex; i < caption.length && i < foundIndex + trimmedMatched.length * 2; i++) {
+                if (caption.substring(foundIndex, i + 1).toLowerCase() === lowerSearchText) {
+                  actualEnd = i + 1;
+                  break;
+                }
+              }
+              if (actualEnd > foundIndex) {
+                start = foundIndex;
+                end = actualEnd;
+              } else {
+                foundIndex = -1; // 見つからなかったことにする
+              }
+            }
           }
         } else {
           // 完全一致が見つかった場合
@@ -256,30 +275,33 @@ NG表現が1つも検出されない場合は、\`"passed": true, "issues": []\`
           end = foundIndex + trimmedMatched.length;
         }
         
-        // それでも見つからない場合、部分一致を試す（3文字以上）
-        if (foundIndex === -1 && trimmedMatched.length >= 3) {
-          const partialText = trimmedMatched.substring(0, 3);
-          const lowerCaption = caption.toLowerCase();
-          const lowerPartial = partialText.toLowerCase();
-          foundIndex = lowerCaption.indexOf(lowerPartial);
-          
-          if (foundIndex !== -1) {
-            // 部分一致が見つかった場合、元のキャプションから正確な位置を特定
-            // 見つかった位置から、実際のテキストの長さを確認
-            const actualStart = caption.indexOf(partialText, foundIndex);
-            if (actualStart !== -1) {
-              start = actualStart;
-              // 部分一致の長さを使用（完全なmatchedTextの長さは使わない）
-              end = actualStart + partialText.length;
-            } else {
-              start = foundIndex;
-              end = foundIndex + partialText.length;
+        // それでも見つからない場合、部分一致を試す（ただし、これは最後の手段）
+        if (foundIndex === -1 && trimmedMatched.length >= 2) {
+          // より長い部分文字列から試す
+          for (let len = Math.min(trimmedMatched.length, 10); len >= 2; len--) {
+            const partialText = trimmedMatched.substring(0, len);
+            const lowerCaption = caption.toLowerCase();
+            const lowerPartial = partialText.toLowerCase();
+            foundIndex = lowerCaption.indexOf(lowerPartial);
+            
+            if (foundIndex !== -1) {
+              // 部分一致が見つかった場合、元のキャプションから正確な位置を特定
+              const actualStart = caption.toLowerCase().indexOf(lowerPartial, foundIndex);
+              if (actualStart !== -1) {
+                // 実際のテキストの長さを確認
+                const actualText = caption.substring(actualStart, actualStart + len);
+                if (actualText.toLowerCase() === lowerPartial) {
+                  start = actualStart;
+                  end = actualStart + len;
+                  break;
+                }
+              }
             }
           }
         }
         
         // 見つからない場合は、このissueをスキップ
-        if (foundIndex === -1) {
+        if (foundIndex === -1 || start < 0 || end <= start) {
           return null;
         }
       }
@@ -290,11 +312,37 @@ NG表現が1つも検出されない場合は、\`"passed": true, "issues": []\`
       }
       
       // 最終的な位置情報で実際のテキストを取得し、matchedTextと一致するか確認
-      const finalActualText = caption.substring(start, end).trim();
-      const finalMatchedText = trimmedMatched.trim();
+      const finalActualText = caption.substring(start, end);
+      const finalMatchedText = trimmedMatched;
       
-      // 最終検証：実際のテキストとmatchedTextが一致しない場合はスキップ
-      if (finalActualText !== finalMatchedText && !finalActualText.includes(finalMatchedText) && !finalMatchedText.includes(finalActualText)) {
+      // 最終検証：実際のテキストとmatchedTextが一致するか確認
+      // 完全一致、または正規化した上での一致を確認
+      const normalizedActual = finalActualText.trim().toLowerCase();
+      const normalizedMatched = finalMatchedText.trim().toLowerCase();
+      
+      if (normalizedActual !== normalizedMatched && 
+          !normalizedActual.includes(normalizedMatched) && 
+          !normalizedMatched.includes(normalizedActual)) {
+        // 一致しない場合、位置情報を再調整
+        const reSearchIndex = caption.toLowerCase().indexOf(normalizedMatched);
+        if (reSearchIndex !== -1) {
+          // 再検索で見つかった場合、その位置を使用
+          start = reSearchIndex;
+          end = reSearchIndex + finalMatchedText.length;
+        } else {
+          // 見つからない場合はスキップ
+          return null;
+        }
+      }
+      
+      // 位置情報の最終検証
+      if (start < 0 || end <= start || end > caption.length) {
+        return null;
+      }
+      
+      // 最終的なテキストを再取得して確認
+      const verifiedText = caption.substring(start, end);
+      if (verifiedText.trim().length === 0) {
         return null;
       }
       

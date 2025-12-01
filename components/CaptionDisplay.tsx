@@ -59,22 +59,33 @@ export default function CaptionDisplay({ caption, onEdit, onManualEdit, onNew, r
     const sortedIssues = [...uniqueIssues].sort((a, b) => b.position.start - a.position.start);
     
     for (const issue of sortedIssues) {
+      // 位置情報の検証（範囲外の場合はスキップ）
+      const start = Math.max(0, Math.min(issue.position.start, caption.length));
+      const end = Math.max(start, Math.min(issue.position.end, caption.length));
+      
+      if (start >= end || start < 0 || end > caption.length) {
+        continue; // 無効な位置情報はスキップ
+      }
+      
       // ハイライト後の部分を追加
-      if (issue.position.end < lastIndex) {
+      if (end < lastIndex) {
         parts.unshift({
-          text: caption.substring(issue.position.end, lastIndex),
+          text: caption.substring(end, lastIndex),
           isHighlighted: false,
         });
       }
       
       // ハイライト部分を追加
-      parts.unshift({
-        text: caption.substring(issue.position.start, issue.position.end),
-        isHighlighted: true,
-        reason: issue.reason,
-      });
+      const highlightText = caption.substring(start, end);
+      if (highlightText.length > 0) {
+        parts.unshift({
+          text: highlightText,
+          isHighlighted: true,
+          reason: issue.reason,
+        });
+      }
       
-      lastIndex = issue.position.start;
+      lastIndex = start;
     }
     
     // 最初の部分を追加
