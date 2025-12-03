@@ -176,7 +176,7 @@ NG表現が1つも検出されない場合は、\`"passed": true, "issues": []\`
 必ず有効なJSON形式で回答してください。`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-5-mini',
+      model: 'gpt-5-nano',
       messages: [
         {
           role: 'system',

@@ -350,7 +350,7 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gpt-5-mini
+          name: gpt-5-nano
           provider: langgenius/openai/openai
         prompt_template:
         - edition_type: basic
@@ -851,7 +851,7 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gpt-5-mini
+          name: gpt-5-nano
           provider: langgenius/openai/openai
         prompt_template:
         - edition_type: basic
